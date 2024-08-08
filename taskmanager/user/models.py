@@ -2,6 +2,8 @@ import uuid
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.db import models
 
+from task.models import Task
+
 class UserManager(BaseUserManager):
     def create_user(self, email, username, phone, password=None, **extra_fields):
         if not email:
@@ -45,6 +47,8 @@ class UserManager(BaseUserManager):
         except self.model.DoesNotExist:
             return None
 
+class UserTask(models.Model):...
+
 class User(AbstractBaseUser, PermissionsMixin):
     
     #Enum for Gender
@@ -71,10 +75,27 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_active   = models.BooleanField(default=True)
     date_joined = models.DateTimeField(auto_now_add=True)
 
-    objects = UserManager()
+    user_manager     = UserManager()
+    task_tasks       = UserTask()
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username', 'phone']
 
     def __str__(self):
         return self.username
+
+class UserTask(models.Model):
+
+    user_id = models.OneToOneField(
+        to=User,
+        name="user_id",
+        verbose_name="User ID",
+        on_delete=models.CASCADE
+    )
+
+    tasks = models.ManyToOneRel(
+        field=Task.task_id,
+        to=Task,
+        field_name="Task",
+        on_delete=models.CASCADE
+    )
