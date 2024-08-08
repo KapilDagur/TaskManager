@@ -1,0 +1,6 @@
+#Virtual Envoriment
+.venv/
+
+#Configuration Files
+config/DEV.ini
+config/PROD.ini
