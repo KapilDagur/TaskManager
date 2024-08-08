@@ -1,7 +1,6 @@
 import uuid
-from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin, Group, Permission
 from django.db import models
-
 from task.models import Task
 
 class UserManager(BaseUserManager):
@@ -47,17 +46,15 @@ class UserManager(BaseUserManager):
         except self.model.DoesNotExist:
             return None
 
-class UserTask(models.Model):...
-
 class User(AbstractBaseUser, PermissionsMixin):
     
-    #Enum for Gender
+    # Enum for Gender
     class GenderChoices(models.TextChoices):
         MALE    = ('M', 'Male')
         FEMALE  = ('F', 'Female')
         OTHER   = ('O', 'Other')
         
-    #ENUM for Role
+    # Enum for Role
     class RoleChoices(models.TextChoices):
         MANAGER     = ('MANAGER', 'Manager')
         TEAM_LEAD   = ('TEAM_LEAD', 'Team Lead')
@@ -75,8 +72,10 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_active   = models.BooleanField(default=True)
     date_joined = models.DateTimeField(auto_now_add=True)
 
-    user_manager     = UserManager()
-    task_tasks       = UserTask()
+    groups = models.ManyToManyField(Group, related_name='custom_user_groups')
+    user_permissions = models.ManyToManyField(Permission, related_name='custom_user_permissions')
+
+    objects = UserManager()
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username', 'phone']
@@ -84,18 +83,18 @@ class User(AbstractBaseUser, PermissionsMixin):
     def __str__(self):
         return self.username
 
+    class Meta:
+        verbose_name = "user"
+        verbose_name_plural = "users"
+
 class UserTask(models.Model):
-
-    user_id = models.OneToOneField(
-        to=User,
-        name="user_id",
-        verbose_name="User ID",
-        on_delete=models.CASCADE
+    user = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE,
+        related_name='user_task'
     )
-
-    tasks = models.ManyToOneRel(
-        field=Task.task_id,
-        to=Task,
-        field_name="Task",
-        on_delete=models.CASCADE
+    task = models.ForeignKey(
+        Task,
+        on_delete=models.CASCADE,
+        related_name='task_users'
     )
