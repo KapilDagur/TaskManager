@@ -4,3 +4,7 @@
 #Configuration Files
 config/DEV.ini
 config/PROD.ini
+
+#Compiled Files
+__pycache__
+*.pyc

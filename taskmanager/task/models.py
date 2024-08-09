@@ -7,7 +7,7 @@ class Task(models.Model):
     task_id = models.UUIDField(
         verbose_name='Task ID',
         name='task_id',
-        primary_key=False,
+        primary_key=True,
         default=uuid.uuid4,
         editable=False
     )
@@ -33,7 +33,7 @@ class Task(models.Model):
     attach_file = models.FileField(
         verbose_name='Attach File(Any)',
         name='task_file',
-        upload_to='uploads/',
+        upload_to='media/',
         null=True,
         blank=True
     )

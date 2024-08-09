@@ -1,0 +1,8 @@
+<h1>{{ task.task_title }}</h1>
+<p>{{ task.task_description }}</p>
+<p><a href="{{ task.task_url }}">Related URL</a></p>
+<p>Status: {{ task.task_status }}</p>
+<p>Attached File: <a href="{{ task.task_file.url }}">{{ task.task_file.name }}</a></p>
+<a href="{% url 'task-update' task.pk %}">Edit</a>
+<a href="{% url 'task-delete' task.pk %}">Delete</a>
+<a href="{% url 'task-list' %}">Back to List</a>
