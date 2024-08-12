@@ -50,3 +50,13 @@ class UserDeleteSerializer(serializers.Serializer):
             return True
         except User.DoesNotExist:
             raise serializers.ValidationError("User not found.")
+        
+
+# myapp/serializers.py
+
+
+
+class LoginSerializer(serializers.Serializer):
+    identifier = serializers.CharField()
+    password = serializers.CharField()
+

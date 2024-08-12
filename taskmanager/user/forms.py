@@ -30,3 +30,13 @@ class UserUpdateForm(forms.ModelForm):
 
 class UserDeleteForm(forms.Form):
     user_id = forms.UUIDField()
+
+
+
+
+from django import forms
+
+class LoginForm(forms.Form):
+    identifier = forms.CharField(max_length=254)
+    password = forms.CharField(widget=forms.PasswordInput)
+

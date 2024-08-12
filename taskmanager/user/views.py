@@ -1,12 +1,30 @@
-from django.shortcuts import render, HttpResponse
-
-# Create your views here.
 from django.shortcuts import render, get_object_or_404, redirect
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from .serializers import UserRegistrationSerializer, UserUpdateSerializer, UserDeleteSerializer
 from .models import User
+from django.contrib.auth import authenticate, login
+
+from .serializers import  LoginSerializer
+from django.contrib.auth import get_user_model
+from django.contrib.auth import authenticate, login as auth_login
+from django.core.exceptions import ObjectDoesNotExist
+from .serializers import LoginSerializer
+from django.shortcuts import render, redirect
+from .forms import LoginForm
+from django.db.models import Q
+
+
+
+
+
+
+
+
+
+
+
 
 class UserRegistrationView(APIView):
     def get(self, request):
@@ -47,3 +65,56 @@ class UserDeleteView(APIView):
             except User.DoesNotExist:
                 return render(request, 'delete.html', {'error': 'User not found.', 'user_id': user_id})
         return render(request, 'delete.html', {'errors': serializer.errors, 'user_id': user_id})
+
+
+
+User = get_user_model()
+
+class LoginView(APIView):
+    def get(self, request):
+        
+        form = LoginForm()
+        return render(request, 'login.html', {'form': form})
+
+    def post(self, request):
+        serializer = LoginSerializer(data=request.data)
+        if serializer.is_valid():
+            identifier = serializer.validated_data['identifier']
+            password = serializer.validated_data['password']
+
+            
+            user = None
+            try:
+                user = User.objects.get(
+                    Q(username=identifier) | Q(email=identifier) | Q(phone_number=identifier)
+                )
+            except ObjectDoesNotExist:
+                return Response({'error': 'Invalid credentials'}, status=status.HTTP_400_BAD_REQUEST)
+
+            
+            if user.check_password(password):
+                auth_login(request, user)
+                return Response({'message': 'Login successful'}, status=status.HTTP_200_OK)
+            else:
+                return Response({'error': 'Invalid credentials'}, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+def login_view(request):
+    if request.method == 'POST':
+        form = LoginForm(request.POST)
+        if form.is_valid():
+            identifier = form.cleaned_data['identifier']
+            password = form.cleaned_data['password']
+
+            user = authenticate(request, username=identifier, password=password)
+
+            if user is not None:
+                auth_login(request, user)
+                return redirect('home')  
+            else:
+                form.add_error(None, 'Invalid credentials')
+    else:
+        form = LoginForm()
+
+    return render(request, 'login.html', {'form': form})
